@@ -7,16 +7,17 @@ from . import config
 
 
 def get_port():
-    ports = ("COM1", "COM2", "COM3", "COM4", "COM5", "/dev/ttyUSB0", "/dev/ttyACM0")
+    # "COM1", "COM2", "COM3", "COM4", "COM5", "/dev/ttyUSB0",
+    ports = ("/dev/ttyACM0",)
     for port in ports:
         try:
             s = serial.Serial(port)
             s.close()
-            # print("Available port is {}".format(port))
+            print("Available port is {}".format(port))
             return port
         except (OSError, serial.SerialException) as e:
+            print("Connection error \n" + str(e))
             pass
-            # print("Connection error \n" + str(e))
 
 
 class Serial(serial.Serial):
@@ -44,15 +45,20 @@ class Serial(serial.Serial):
         self.reset_input_buffer()
         self.reset_output_buffer()
 
-        with open(filename, "w") as file:
-            while 1:
-                out = ''
-                temp = self.readline()
-                out = str(temp.decode()).replace("\00", "")
-                if out != '':
-                    if out != config.STOP:
-                        # file.write(out)
-                        print(out)
-                    else:
-                        print("File has been saved")
-                        break
+        # with open(filename, "w") as file:
+            # while 1:
+            #     out = ''
+            #     temp = self.readline()
+            #     print(temp)
+            #     out = str(temp.decode()).replace("\00", "")
+            #     if out != '':
+            #         if out != config.STOP:
+            #             # file.write(out)
+            #             print(out)
+            #         else:
+            #             print("File has been saved")
+            #             break
+        while 1:
+            if self.in_waiting:
+                print(self.read(self.in_waiting))
+
